@@ -20,19 +20,19 @@ char	*get_line(t_list *list)
 	if (list == NULL)
 		return (NULL);
 	str_len = newline_len(list);
-	next_str = ft_malloc(str_len + 1);
+	next_str = malloc(str_len + 1);
 	if (next_str == NULL)
 		return (NULL);
 	ft_strcopy(list, next_str);
 	return (next_str);
 }
-void	append(t_list **list, char	*buf)
+void	ft_append(t_list **list, char	*buf)
 {
 	t_list	*new_node;
 	t_list	*last_node;
 
-	last_node = find_last_node(*list);
-	new_node = ft_malloc(sizeof(t_list));
+	last_node = LF_last_node(*list);
+	new_node = malloc(sizeof(t_list));
 	if (new_node == NULL)
 		return ;
 	if (last_node == NULL)
@@ -47,10 +47,10 @@ void	create_list(t_list **list, int fd)
 	int	char_read;
 	char	*buf;
 	
-	while (!found_newline(*list))
+	while (!LF_newline(*list))
 	{
-		buf = ft_malloc(BUFFER_SIZE + 1);
-		if (buf = NULL)
+		buf = malloc(BUFFER_SIZE + 1);
+		if (buf == NULL)
 			return ;
 									//42
 		char_read = read(fd, buf, BUFFER_SIZE);
@@ -61,9 +61,36 @@ void	create_list(t_list **list, int fd)
 		}
 		buf[char_read] = '\0';
 		// append nodo
-		append(list, buf);
+		ft_append(list, buf);
 	}
 }
+
+void clean_list(t_list **list)
+{
+	t_list *last_node;
+	t_list *clean_node;
+	int		i;
+	int		j;
+	char	*buf;
+
+	buf = malloc(BUFFER_SIZE + 1);
+	clean_node = malloc(sizeof(t_list));
+	if (buf == NULL || clean_node == NULL)
+		return ;
+	last_node = LF_last_node(*list);
+
+	i = 0;
+	j = 0;
+	while(last_node->str_buf[i] != '\n' && last_node->str_buf[i] != 0)
+		i++;
+	while (last_node->str_buf[i] != 0 && last_node->str_buf[i + 1])
+		buf[j + 1] = last_node->str_buf[i];
+	buf[j] = '\0';
+	clean_node->str_buf = buf;
+	clean_node->next = NULL;
+	ft_dealloc(list, clean_node,buf);
+}
+
 
 char *get_next_line(int fd)
 {
@@ -82,6 +109,19 @@ char *get_next_line(int fd)
 		return (NULL);
 	//busca la linea en la lista
 	next_line = get_line(list);
-	polish_list(&list);
+	clean_list(&list);
 	return (next_line);
+}
+
+
+int main()
+{
+	int fd;
+	char	*line;
+	int	lines;
+
+	lines = 1;
+	fd = open("test.txt", O_RDONLY);
+	while ((line = get_next_line(fd)))
+		printf("%d->%s\n", lines++, line);
 }

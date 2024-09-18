@@ -16,14 +16,12 @@ int	newline_len(t_list *list)
 {
 	int	i;
 	int	len;
-	
-	if (list == NULL)
-		return (NULL);
+
 	len = 0;
 	while (list != NULL)
 	{
 		i = 0;
-		while (list->str_buf[i] != NULL)
+		while (!list->str_buf[i])
 		{
 			if (list->str_buf[i] == '\n')
 			{
@@ -43,13 +41,11 @@ void	ft_strcopy(t_list *list, char *str)
 	int	i;
 	int	j;
 
-	if (list == NULL)
-		return (NULL);
 	j = 0;
 	while (list != NULL)
 	{
 		i = 0;
-		while (list->str_buf[i] != NULL)
+		while (!list->str_buf[i])
 		{
 			if (list->str_buf[i] == '\n')
 			{
@@ -62,4 +58,57 @@ void	ft_strcopy(t_list *list, char *str)
 		list = list->next;
 	}
 	str[j] = '\0';
+}
+
+t_list	*LF_last_node(t_list *list)
+{
+	if (list == NULL)
+		return (NULL);
+	while (list->next)
+		list = list->next;
+	return (list);
+}
+
+//free todo el heap
+void	ft_dealloc(t_list **list, t_list *clean_node, char *buf)
+{
+	t_list	*tmp;
+
+	if(*list == NULL)
+		return ;
+	while (*list)
+	{
+		tmp = (*list)->next;
+		free((*list)->str_buf);
+		free(*list);
+		*list = tmp;
+	}
+	*list = NULL;
+	if (clean_node->str_buf[0])
+		*list = clean_node;
+	else
+	{
+		free(buf);
+		free(clean_node);
+	}
+}
+
+int	LF_newline(t_list *list)
+{
+	int	i;
+
+	if(list == NULL)
+		return (0);
+	while(list != 0)
+	{
+		i = 0;
+		while (list->str_buf[i] && i < BUFFER_SIZE)
+		{
+				if(list->str_buf[i] == '\n')
+					return (i);
+				i++;
+		}
+		list = list->next;
+	}
+	return (0);
 }
